@@ -33,8 +33,8 @@ INSERT INTO client VALUES
 
 CREATE TABLE land_buyer (
     cid INT, 
-    min_acres INT, 
-    max_acres INT,
+    min_acres FLOAT, 
+    max_acres FLOAT,
     PRIMARY KEY(cid),
     FOREIGN KEY(cid) REFERENCES client(cid)
 );
@@ -229,3 +229,14 @@ INSERT INTO land_trans VALUES
     (8, 3, 18, 3, 8, 400000),
     (9, 4, 19, 9, 9, 300000),
     (10, 5, 20, 10, 10, 380000);
+
+-- query 1
+CREATE VIEW land_view AS
+    SELECT la.pid, listprice, street, city, state, zip, acreage
+        FROM land la join listing li
+        WHERE la.pid = li.pid;
+
+SELECT lb.cid, listprice, street, city, state, zip, acreage
+    FROM land_buyer lb, land_view lv
+    WHERE lv.acreage >= lb.min_acres
+        and lv.acreage <= lb.max_acres

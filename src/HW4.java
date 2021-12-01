@@ -1,6 +1,9 @@
 import java.sql.*;
+import java.util.Scanner;
 
 public class HW4 {
+    static Scanner s;
+    static Statement stmt;
     public static void main(String[] args) {
         // Load mysql driver
         try {
@@ -16,13 +19,15 @@ public class HW4 {
             Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/school", "root", "");
             System.out.println("Connectiion established.\n");
 
-            Statement stmt = con.createStatement();
+            stmt = con.createStatement();
+            s = new Scanner(System.in);
+
             // run queries
-            runQuery1(stmt, "select * from student");
-            // runQuery2(stmt, "");
-            // runQuery3(stmt, "");
-            // runQuery4(stmt, "");
-            // runQuery5(stmt, "");
+            runQuery1();
+            // runQuery2();
+            // runQuery3();
+            // runQuery4();
+            // runQuery5();
         } catch (SQLException e) {
             System.out.println(e.getMessage() + " Can't connect to database.");
             while (e != null) {
@@ -34,7 +39,11 @@ public class HW4 {
         }
     }
     // runs a query on the database
-    public static void runQuery1(Statement stmt, String query) throws SQLException {
+    public static void runQuery1() throws SQLException {
+        System.out.print("Enter minimum credit hours: ");
+        int attr = s.nextInt();
+        String query = "SELECT * FROM student WHERE credits >= " + attr + ";";
+
         ResultSet result = stmt.executeQuery(query);
 
         System.out.println("Prcessing results from query 1...");
