@@ -242,4 +242,15 @@ SELECT lb.cid, listprice, street, city, state, zip, acreage
         and lv.acreage <= lb.max_acres
 
 -- query 2
-SELECT cid, pid, listprice, street, city, state, zip, hb.bed, hb.bath, hb.style FROM house_buyer hb, house_view hv WHERE hb.style = hv.style AND hb.bed = hv.bed AND hb.bath = hv.bath
+CREATE VIEW house_view AS 
+    SELECT h.pid, listprice, street, city, state, zip, bed, bath, style
+        FROM house h join listing l
+            ON h.pid = l.pid;
+
+SELECT cid, pid, listprice, street, city, state, zip, hb.bed, hb.bath, hb.style 
+    FROM house_buyer hb, house_view hv 
+    WHERE hb.style = hv.style 
+    AND hb.bed = hv.bed 
+    AND hb.bath = hv.bath;
+
+    -- test
