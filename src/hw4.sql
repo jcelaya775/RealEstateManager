@@ -253,4 +253,31 @@ SELECT cid, pid, listprice, street, city, state, zip, hb.bed, hb.bath, hb.style
     AND hb.bed = hv.bed 
     AND hb.bath = hv.bath;
 
-    -- test
+-- query 3
+CREATE VIEW client_info AS
+    (SELECT c.cid, fname, lname
+        FROM client c join house_buyer h
+            ON c.cid = h.cid) UNION
+    (SELECT c.cid, fname, lname
+        FROM client c join land_buyer l
+            ON c.cid = l.cid) UNION
+    (SELECT c.cid, fname, lname
+        FROM client c join seller s
+            ON c.cid = s.cid);
+
+CREATE VIEW transactions AS
+    (SELECT * FROM house_trans)
+    UNION
+    (SELECT * FROM land_trans);
+
+SELECT DISTINCT pid, c1.cid, c1.fname, c1.lname, c2.cid, c2.fname, c2.lname, r1.rid, r1.fname, r1.lname, r2.rid, r2.fname, r2.lname 
+    FROM transactions t, client_info c1, client_info c2, realtor r1, realtor r2
+    WHERE (t.buy_cid = c1.cid OR t.sell_cid = c1.cid)
+        AND (t.buy_cid = c2.cid OR t.sell_cid = c2.cid)
+        AND (t.buy_rid = r1.rid OR t.sell_rid = r1.rid)
+        AND (t.buy_rid = r2.rid OR t.sell_rid = r2.rid);
+
+-- query 4 (fix so that houses compares with houses and so forth)
+SELECT DISTINCT t.pid, t.buy_rid, t.sell_rid, t.sellprice, l.listprice 
+    FROM transactions t, listing l
+    WHERE t.sellprice > l.listprice;
