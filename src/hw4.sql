@@ -269,7 +269,7 @@ CREATE VIEW transactions AS
     (SELECT * FROM house_trans)
     UNION
     (SELECT * FROM land_trans);
-
+-- fix this query so that all info is displayed for each property (pid)
 SELECT DISTINCT pid, c1.cid, c1.fname, c1.lname, c2.cid, c2.fname, c2.lname, r1.rid, r1.fname, r1.lname, r2.rid, r2.fname, r2.lname 
     FROM transactions t, client_info c1, client_info c2, realtor r1, realtor r2
     WHERE (t.buy_cid = c1.cid OR t.sell_cid = c1.cid)
@@ -277,16 +277,23 @@ SELECT DISTINCT pid, c1.cid, c1.fname, c1.lname, c2.cid, c2.fname, c2.lname, r1.
         AND (t.buy_rid = r1.rid OR t.sell_rid = r1.rid)
         AND (t.buy_rid = r2.rid OR t.sell_rid = r2.rid);
 
--- query 4 (fix so that houses compares with houses and so forth)
+-- query 4
 SELECT DISTINCT t.pid, t.buy_rid, t.sell_rid, t.sellprice, l.listprice 
     FROM transactions t, listing l
-    WHERE t.sellprice > l.listprice;
+    WHERE t.pid = l.pid 
+        AND sellprice > listprice;
 
 -- query 5
-SELECT DISTINCT rid, fname, lname, count(rid) as count
+SELECT DISTINCT rid, fname, lname
     FROM transactions, realtor
     WHERE buy_rid = rid
     GROUP BY rid
-    HAVING count >= 3;
-
+    HAVING count(rid) >= 3;
+    
 -- query 6
+CREATE VIEW only_buying_clients AS
+    SELECT cid FROM land_buyer
+    UNION
+    SELECT cid FROM house_buyer
+    WHERE NOT EXISTS
+	    (SELECT cid FROM seller);
