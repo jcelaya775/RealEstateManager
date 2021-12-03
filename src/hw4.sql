@@ -297,3 +297,12 @@ CREATE VIEW only_buying_clients AS
     SELECT cid FROM house_buyer
     WHERE NOT EXISTS
 	    (SELECT cid FROM seller);
+
+-- query 7
+SELECT pid 
+    FROM transactions
+    WHERE sellprice < 
+    (SELECT min(listprice) 
+    FROM ((SELECT listprice FROM house_listing) 
+    UNION
+        (SELECT listprice FROM land_listing)));

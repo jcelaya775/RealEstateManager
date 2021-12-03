@@ -16,7 +16,7 @@ public class HW4 {
         try {
             // connect to db
             System.out.println("Starting connection...");
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/school", "root", "");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/real_estate", "root", "");
             System.out.println("Connectiion established.\n");
 
             stmt = con.createStatement();
@@ -25,7 +25,7 @@ public class HW4 {
             // run queries
             runQuery1();
             // runQuery2();
-            // runQuery3();
+            // runQuery3();|
             // runQuery4();
             // runQuery5();
         } catch (SQLException e) {
@@ -40,20 +40,34 @@ public class HW4 {
     }
     // runs a query on the database
     public static void runQuery1() throws SQLException {
-        System.out.print("Enter minimum credit hours: ");
-        int attr = s.nextInt();
-        String query = "SELECT * FROM student WHERE credits >= " + attr + ";";
-
+        System.out.print("Enter client's id: ");
+        int cid = s.nextInt();
+ 
+        String query = "SELECT lb.cid, listprice, street, city, state, zip, acreage" +
+            "FROM land_buyer lb, land_view lv" + 
+            "WHERE lv.acreage >= lb.min_acres" +
+               "and lv.acreage <= lb.max_acres" + 
+                "and cid = " + cid + ";";
         ResultSet result = stmt.executeQuery(query);
 
-        System.out.println("Prcessing results from query 1...");
         while (result.next()) {
-            String name = result.getString("sname");
-            String major = result.getString("major");
-            System.out.println(name + " is majoring in " + major + "!");
+            String listprice = result.getString("listprice");
+            String street = result.getString("street");
+            String city = result.getString("city");
+            String state = result.getString("state");
+            String zip = result.getString("zip");
+            String acreage = result.getString("acreage");
+
+            System.out.println("cid: " + cid);
+            System.out.println("listprice: " + listprice);
+            System.out.println("street: " + street);
+            System.out.println("city: " + city);
+            System.out.println("state: " + state);
+            System.out.println("zip: " + zip);
+            System.out.println("acreage: " + acreage);
         }
 
-        System.out.println();
+        System.out.println();        
     }
     public static void runQuery2(Statement stmt, String query) throws SQLException {
         ResultSet result = stmt.executeQuery(query);
