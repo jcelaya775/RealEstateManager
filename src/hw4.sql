@@ -281,3 +281,12 @@ SELECT DISTINCT pid, c1.cid, c1.fname, c1.lname, c2.cid, c2.fname, c2.lname, r1.
 SELECT DISTINCT t.pid, t.buy_rid, t.sell_rid, t.sellprice, l.listprice 
     FROM transactions t, listing l
     WHERE t.sellprice > l.listprice;
+
+-- query 5
+SELECT DISTINCT rid, fname, lname, count(rid) as count
+    FROM transactions, realtor
+    WHERE buy_rid = rid
+    GROUP BY rid
+    HAVING count >= 3;
+
+-- query 6
