@@ -231,18 +231,18 @@ INSERT INTO land_trans VALUES
     (10, 5, 20, 10, 10, 380000);
 
 -- query 1
-CREATE VIEW land_view AS
+CREATE OR REPLACE VIEW land_view AS
     SELECT la.pid, listprice, street, city, state, zip, acreage
         FROM land la join listing li
         WHERE la.pid = li.pid;
 
-SELECT lb.cid, listprice, street, city, state, zip, acreage
+SELECT lb.cid, lv.pid, listprice, street, city, state, zip, acreage
     FROM land_buyer lb, land_view lv
     WHERE lv.acreage >= lb.min_acres
-        AND lv.acreage <= lb.max_acres
+        AND lv.acreage <= lb.max_acres;
 
 -- query 2
-CREATE VIEW house_view AS 
+CREATE OR REPLACE VIEW house_view AS 
     SELECT h.pid, listprice, street, city, state, zip, bed, bath, style
         FROM house h join listing l
             ON h.pid = l.pid;
@@ -254,12 +254,12 @@ SELECT cid, pid, listprice, street, city, state, zip, hb.bed, hb.bath, hb.style
     AND hb.bath = hv.bath;
 
 -- query 3
-CREATE VIEW transactions AS
+CREATE OR REPLACE VIEW transactions AS
     (SELECT * FROM house_trans)
     UNION
     (SELECT * FROM land_trans);
 
-CREATE VIEW buying_client AS
+CREATE OR REPLACE VIEW buying_client AS
     (SELECT c.cid, fname, lname
         FROM house_buyer h JOIN client c
             ON h.cid = c.cid)
@@ -268,7 +268,7 @@ CREATE VIEW buying_client AS
         FROM land_buyer l JOIN client c
             ON l.cid = c.cid);
 
-CREATE VIEW selling_client AS
+CREATE OR REPLACE VIEW selling_client AS
     SELECT c.cid, fname, lname 
         FROM seller s JOIN client c
             ON s.cid = c.cid;
@@ -301,7 +301,7 @@ SELECT DISTINCT rid, fname, lname
         (SELECT sell_rid FROM transactions); 
 
 -- query 7
-CREATE VIEW before_after AS
+CREATE OR REPLACE VIEW before_after AS
     SELECT t.pid, (t.sellprice - l.listprice) as net_profit_loss
     FROM transactions t JOIN listing l
         ON t.pid = l.pid;
@@ -312,10 +312,15 @@ SELECT pid, net_profit_loss as highest_profit
         (SELECT max(net_profit_loss)
             FROM before_after);
 
-SELECT pid, net_profit_loss
-    FROM before_after a 
-    INNER JOIN
-    (SELECT pid, max(net_profit_loss) net_profit_loss
-        FROM before_after
-        GROUP BY pid) b
-    ON a.pid = b.pid AND a.net_profit_loss = b.net_profit_loss;
+-- query 8
+SELECT pid, acreage
+    FROM land_listing ll
+    WHERE NOT EXISTS
+        (SELECT ll.acreage
+            FROM land_buyer
+            WHERE ll.acreage >= min_acres
+                AND ll.acreage <= max_acres
+         EXCEPT
+         SELECT ll.acreage
+            FROM land_listing ll2 
+            WHERE ll.pid = ll2.pid);
