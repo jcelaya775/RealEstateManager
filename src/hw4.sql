@@ -324,3 +324,14 @@ SELECT pid, acreage
          SELECT ll.acreage
             FROM land_listing ll2 
             WHERE ll.pid = ll2.pid);
+
+-- query 9
+SELECT r.rid, fname, lname, (sum(sellprice) * 0.03) as earnings
+    FROM transactions t, realtor r
+    WHERE t.sell_rid = r.rid
+        AND sum(sellprice) >=
+        (SELECT sum(sellprice)
+            FROM transactions t2
+            WHERE t2.sell_rid = r.rid 
+            GROUP BY sell_rid
+        );
