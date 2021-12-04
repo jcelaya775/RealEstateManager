@@ -254,28 +254,31 @@ SELECT cid, pid, listprice, street, city, state, zip, hb.bed, hb.bath, hb.style
     AND hb.bath = hv.bath;
 
 -- query 3
-CREATE VIEW client_info AS
-    (SELECT c.cid, fname, lname
-        FROM client c join house_buyer h
-            ON c.cid = h.cid) UNION
-    (SELECT c.cid, fname, lname
-        FROM client c join land_buyer l
-            ON c.cid = l.cid) UNION
-    (SELECT c.cid, fname, lname
-        FROM client c join seller s
-            ON c.cid = s.cid);
-
 CREATE VIEW transactions AS
     (SELECT * FROM house_trans)
     UNION
     (SELECT * FROM land_trans);
--- fix this query so that all info is displayed for each property (pid)
-SELECT DISTINCT pid, c1.cid, c1.fname, c1.lname, c2.cid, c2.fname, c2.lname, r1.rid, r1.fname, r1.lname, r2.rid, r2.fname, r2.lname 
-    FROM transactions t, client_info c1, client_info c2, realtor r1, realtor r2
-    WHERE (t.buy_cid = c1.cid OR t.sell_cid = c1.cid)
-        AND (t.buy_cid = c2.cid OR t.sell_cid = c2.cid)
-        AND (t.buy_rid = r1.rid OR t.sell_rid = r1.rid)
-        AND (t.buy_rid = r2.rid OR t.sell_rid = r2.rid);
+
+CREATE VIEW buying_client AS
+    (SELECT c.cid, fname, lname
+        FROM house_buyer h JOIN client c
+            ON h.cid = c.cid)
+    UNION
+    (SELECT c.cid, fname, lname
+        FROM land_buyer l JOIN client c
+            ON l.cid = c.cid);
+
+CREATE VIEW selling_client AS
+    SELECT c.cid, fname, lname 
+        FROM seller s JOIN client c
+            ON s.cid = c.cid;
+
+SELECT DISTINCT pid, bc.cid as buy_cid, bc.fname, bc.lname, sc.cid as sell_cid, sc.fname, sc.lname, r1.rid as buy_rid, r1.fname, r1.lname, r2.rid as sell_rid, r2.fname, r2.lname 
+    FROM transactions t,  buying_client bc, selling_client sc, realtor r1, realtor r2
+    WHERE t.buy_cid = bc.cid 
+        AND t.sell_cid = sc.cid
+        AND (t.buy_rid = r1.rid OR t.buy_rid = r1.rid)
+        AND (t.sell_rid = r2.rid OR t.sell_cid = r2.rid);
 
 -- query 4
 SELECT DISTINCT t.pid, t.buy_rid, t.sell_rid, t.sellprice, l.listprice 
@@ -291,18 +294,8 @@ SELECT DISTINCT rid, fname, lname
     HAVING count(rid) >= 3;
     
 -- query 6
-CREATE VIEW only_buying_clients AS
-    SELECT cid FROM land_buyer
-    UNION
-    SELECT cid FROM house_buyer
-    WHERE NOT EXISTS
-	    (SELECT cid FROM seller);
-
--- query 7
-SELECT pid 
-    FROM transactions
-    WHERE sellprice < 
-    (SELECT min(listprice) 
-    FROM ((SELECT listprice FROM house_listing) 
-    UNION
-        (SELECT listprice FROM land_listing)));
+SELECT rid, fname, lname
+    FROM transactions JOIN realtor r
+        ON t.buy_rid = r.rid
+    WHERE r.rid NOT IN
+        (SELECT sell_rid FROM transactions); 
