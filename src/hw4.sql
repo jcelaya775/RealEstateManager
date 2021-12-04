@@ -291,7 +291,7 @@ SELECT DISTINCT rid, fname, lname
     FROM transactions, realtor
     WHERE buy_rid = rid
     GROUP BY rid
-    HAVING count(rid) >= 3;
+    HAVING count(rid) > 3;
     
 -- query 6
 SELECT DISTINCT rid, fname, lname

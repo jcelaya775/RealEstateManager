@@ -56,7 +56,7 @@ public class HW4 {
 
     // runs a query on the database
     public static void runQuery1() throws SQLException {
-        System.out.print("Enter client's id: ");
+        System.out.print("Enter land buying client's id: ");
         int cid = s.nextInt();
 
         String view = "CREATE OR REPLACE VIEW land_view AS\n"
@@ -74,25 +74,15 @@ public class HW4 {
 
         System.out.println("\nProperties that match land buying client " + cid + "'s preferences:\n");
         while (result.next()) {
-            String pid = result.getString("pid");
-            String listprice = result.getString("listprice");
-            String street = result.getString("street");
-            String city = result.getString("city");
-            String state = result.getString("state");
-            String zip = result.getString("zip");
-            String acreage = result.getString("acreage");
-
-            System.out.println("pid: " + pid);
-            System.out.println("listprice: " + listprice);
-            System.out.println("street: " + street);
-            System.out.println("city: " + city);
-            System.out.println("state: " + state);
-            System.out.println("zip: " + zip);
-            System.out.println("acreage: " + acreage);
+            System.out.println("pid: " + result.getInt("pid"));
+            System.out.println("listprice: " + result.getInt("listprice"));
+            System.out.println("street: " + result.getString("street"));
+            System.out.println("city: " + result.getString("city"));
+            System.out.println("state: " + result.getString("state"));
+            System.out.println("zip: " + result.getInt("zip"));
+            System.out.println("acreage: " + result.getInt("acreage"));
             System.out.println();
         }
-
-        System.out.println();
     }
 
     public static void runQuery2() throws SQLException {
@@ -115,33 +105,21 @@ public class HW4 {
 
         System.out.println("\nProperties that match house buying client " + cid + "'s preferences:\n");
         while (result.next()) {
-            String pid = result.getString("pid");
-            String listprice = result.getString("listprice");
-            String street = result.getString("street");
-            String city = result.getString("city");
-            String state = result.getString("state");
-            String zip = result.getString("zip");
-            String bed = result.getString("bed");
-            String bath = result.getString("bath");
-            String style = result.getString("style");
-
-            System.out.println("pid: " + pid);
-            System.out.println("listprice: " + listprice);
-            System.out.println("street: " + street);
-            System.out.println("city: " + city);
-            System.out.println("state: " + state);
-            System.out.println("zip: " + zip);
-            System.out.println("bed: " + bed);
-            System.out.println("bath: " + bath);
-            System.out.println("style: " + style);
+            System.out.println("pid: " + result.getInt("pid"));
+            System.out.println("listprice: " + result.getInt("listprice"));
+            System.out.println("street: " + result.getString("street"));
+            System.out.println("city: " + result.getString("city"));
+            System.out.println("state: " + result.getString("state"));
+            System.out.println("zip: " + result.getInt("zip"));
+            System.out.println("bed: " + result.getInt("bed"));
+            System.out.println("bath: " + result.getInt("bath"));
+            System.out.println("style: " + result.getString("style"));
             System.out.println();
         }
-
-        System.out.println();
     }
 
     public static void runQuery3() throws SQLException {
-        System.out.print("Enter property id: ");
+        System.out.print("Enter property id for a transaction: ");
         int pid = s.nextInt();
 
         // execute transcations view
@@ -175,36 +153,63 @@ public class HW4 {
                 + "WHERE t.buy_cid = bc.cid\n"
                 + "AND t.sell_cid = sc.cid\n"
                 + "AND (t.buy_rid = r1.rid OR t.buy_rid = r1.rid)\n"
-                + "AND (t.sell_rid = r2.rid OR t.sell_cid = r2.rid);";
+                + "AND (t.sell_rid = r2.rid OR t.sell_cid = r2.rid)"
+                + "AND pid = " + pid + ";";
         ResultSet result = stmt.executeQuery(query);
 
-        System.out.println("\nAll individuals involved in property " + pid + ":\n");
+        System.out.println("\nAll individuals involved in the transaction for property " + pid + ":\n");
         while (result.next()) {
-
+            System.out.println("buying client id: " + result.getInt(2));
+            System.out.println("buying client first name: " + result.getString(3));
+            System.out.println("buying client last name: " + result.getString(4));
+            System.out.println("selling client id: " + result.getInt(5));
+            System.out.println("selling client first name: " + result.getString(6));
+            System.out.println("selling client last name: " + result.getString(7));
+            System.out.println("buying realtor id: " + result.getInt(8));
+            System.out.println("buying realtor first name: " + result.getString(9));
+            System.out.println("buying realtor last name: " + result.getString(10));
+            System.out.println("selling realtor id: " + result.getInt(11));
+            System.out.println("selling realtor first name: " + result.getString(12));
+            System.out.println("selling realtor last name: " + result.getString(13));
+            System.out.println();
         }
-
-        System.out.println();
     }
 
     public static void runQuery4() throws SQLException {
-        // ResultSet result = stmt.executeQuery(query);
+        String query = "SELECT DISTINCT t.pid, t.buy_rid, t.sell_rid, t.sellprice, l.listprice\n"
+                + "FROM transactions t, listing l\n"
+                + "WHERE t.pid = l.pid\n"
+                + "AND sellprice > listprice;";
+        ResultSet result = stmt.executeQuery(query);
 
-        System.out.println("Prcessing results from query 4...");
-        // while (result.next()) {
-        // do something
-        // }
-
-        System.out.println();
+        System.out.println("\nAll properties that sold for more than asking price:\n");
+        while (result.next()) {
+            System.out.println("pid: " + result.getInt(1));
+            System.out.println("buy_rid: " + result.getInt(2));
+            System.out.println("sell_rid: " + result.getInt(3));
+            System.out.println("selling price: " + result.getInt((4)));
+            System.out.println("listing price: " + result.getInt(5));
+            System.out.println();
+        }
     }
 
     public static void runQuery5() throws SQLException {
-        // ResultSet result = stmt.executeQuery(query);
+        System.out.print("Enter least number of transactions that realtor is involved in: ");
+        int num = s.nextInt();
 
-        System.out.println("Prcessing results from query 5...");
-        // while (result.next()) {
-        // do something
-        // }
+        String query = "SELECT DISTINCT rid, fname, lname\n"
+                + "FROM transactions, realtor\n"
+                + "WHERE buy_rid = rid\n"
+                + "GROUP BY rid\n"
+                + "HAVING count(rid) > " + num + ";";
+        ResultSet result = stmt.executeQuery(query);
 
-        System.out.println();
+        System.out.println("\nRealtors that are involved in more than " + num + " transcactions:\n");
+        while (result.next()) {
+            System.out.println("rid: " + result.getInt(1));
+            System.out.println("first name: " + result.getString(2));
+            System.out.println("last name: " + result.getString(3));
+            System.out.println();
+        }
     }
 }
