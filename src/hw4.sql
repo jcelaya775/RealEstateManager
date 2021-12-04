@@ -239,7 +239,7 @@ CREATE VIEW land_view AS
 SELECT lb.cid, listprice, street, city, state, zip, acreage
     FROM land_buyer lb, land_view lv
     WHERE lv.acreage >= lb.min_acres
-        and lv.acreage <= lb.max_acres
+        AND lv.acreage <= lb.max_acres
 
 -- query 2
 CREATE VIEW house_view AS 
@@ -294,8 +294,28 @@ SELECT DISTINCT rid, fname, lname
     HAVING count(rid) >= 3;
     
 -- query 6
-SELECT rid, fname, lname
+SELECT DISTINCT rid, fname, lname
     FROM transactions JOIN realtor r
         ON t.buy_rid = r.rid
     WHERE r.rid NOT IN
         (SELECT sell_rid FROM transactions); 
+
+-- query 7
+CREATE VIEW before_after AS
+    SELECT t.pid, (t.sellprice - l.listprice) as net_profit_loss
+    FROM transactions t JOIN listing l
+        ON t.pid = l.pid;
+        
+SELECT pid, net_profit_loss as highest_profit
+    FROM before_after
+    WHERE net_profit_loss IN 
+        (SELECT max(net_profit_loss)
+            FROM before_after);
+
+SELECT pid, net_profit_loss
+    FROM before_after a 
+    INNER JOIN
+    (SELECT pid, max(net_profit_loss) net_profit_loss
+        FROM before_after
+        GROUP BY pid) b
+    ON a.pid = b.pid AND a.net_profit_loss = b.net_profit_loss;

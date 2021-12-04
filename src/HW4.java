@@ -4,6 +4,7 @@ import java.util.Scanner;
 public class HW4 {
     static Scanner s;
     static Statement stmt;
+
     public static void main(String[] args) {
         // Load mysql driver
         try {
@@ -38,15 +39,16 @@ public class HW4 {
             System.out.println("Some other errors and stuff...yeup");
         }
     }
+
     // runs a query on the database
     public static void runQuery1() throws SQLException {
         System.out.print("Enter client's id: ");
         int cid = s.nextInt();
- 
+
         String query = "SELECT lb.cid, listprice, street, city, state, zip, acreage" +
-            "FROM land_buyer lb, land_view lv" + 
-            "WHERE lv.acreage >= lb.min_acres" +
-               "and lv.acreage <= lb.max_acres" + 
+                "FROM land_buyer lb, land_view lv" +
+                "WHERE lv.acreage >= lb.min_acres" +
+                "and lv.acreage <= lb.max_acres" +
                 "and cid = " + cid + ";";
         ResultSet result = stmt.executeQuery(query);
 
@@ -67,8 +69,9 @@ public class HW4 {
             System.out.println("acreage: " + acreage);
         }
 
-        System.out.println();        
+        System.out.println();
     }
+
     public static void runQuery2(Statement stmt, String query) throws SQLException {
         ResultSet result = stmt.executeQuery(query);
 
@@ -81,31 +84,34 @@ public class HW4 {
 
         System.out.println();
     }
+
     public static void runQuery3(Statement stmt, String query) throws SQLException {
         ResultSet result = stmt.executeQuery(query);
 
         System.out.println("Prcessing results from query 3...");
-        while(result.next()) {
+        while (result.next()) {
             // do something
         }
 
         System.out.println();
     }
+
     public static void runQuery4(Statement stmt, String query) throws SQLException {
         ResultSet result = stmt.executeQuery(query);
 
         System.out.println("Prcessing results from query 4...");
-        while(result.next()) {
+        while (result.next()) {
             // do something
         }
 
         System.out.println();
     }
+
     public static void runQuery5(Statement stmt, String query) throws SQLException {
         ResultSet result = stmt.executeQuery(query);
 
         System.out.println("Prcessing results from query 1...");
-        while(result.next()) {
+        while (result.next()) {
             // do something
         }
 
