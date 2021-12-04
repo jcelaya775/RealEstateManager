@@ -313,17 +313,23 @@ SELECT pid, net_profit_loss as highest_profit
             FROM before_after);
 
 -- query 8
+CREATE VIEW land_compat AS
+    SELECT la.pid, la.acreage
+        FROM land la, land_buyer lb
+        WHERE la.acreage >= lb.min_acres
+            AND la.acreage <= lb.max_acres;
+
 SELECT pid, acreage
-    FROM land_listing ll
+    FROM land l
     WHERE NOT EXISTS
-        (SELECT ll.acreage
-            FROM land_buyer
-            WHERE ll.acreage >= min_acres
-                AND ll.acreage <= max_acres
-         EXCEPT
-         SELECT ll.acreage
-            FROM land_listing ll2 
-            WHERE ll.pid = ll2.pid);
+        (SELECT la.pid, la.acreage -- properites that satisfy client's needs 
+            FROM land la, land_buyer lb
+            WHERE la.acreage >= lb.min_acres
+                AND la.acreage <= lb.max_acres
+        EXCEPT
+        SELECT la.pid, la.acreage -- property that match the property that we're checking for
+           	FROM land la
+           	WHERE la.pid = l.pid);
 
 -- query 9
 SELECT r.rid, fname, lname, (sum(sellprice) * 0.03) as earnings
