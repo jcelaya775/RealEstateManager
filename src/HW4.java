@@ -23,25 +23,46 @@ public class HW4 {
             stmt = con.createStatement();
             s = new Scanner(System.in);
 
-            System.out.print("Enter a query to run: ");
-            int query = s.nextInt();
+            System.out.print("Would you ilke to run a query? (Y/N): ");
+            String ans = s.next();
 
-            switch (query) {
-                case 1:
-                    runQuery1();
-                    break;
-                case 2:
-                    runQuery2();
-                    break;
-                case 3:
-                    runQuery3();
-                    break;
-                case 4:
-                    runQuery4();
-                    break;
-                case 5:
-                    runQuery5();
-                    break;
+            while (ans.equalsIgnoreCase("y") || ans.equalsIgnoreCase("yes")) {
+                System.out.println();
+                System.out.println(
+                        "Query 1) For a particular land buying client, show all properties that match the client's interests.");
+                System.out.println(
+                        "Query 2) For a particular land buying client, show all properties that match the client's interests.");
+                System.out.println(
+                        "Query 3) For a particular transaction, show the property id and all individuals involved in that transaction.");
+                System.out.println("Query 4) Show all properties that sold for more than the listing price.");
+                System.out.println(
+                        "Query 5) Show the realtor id and name for any realtor involved in more than x transactions.");
+                System.out.println();
+
+                System.out.print("Enter a query to run: ");
+
+                int query = s.nextInt();
+
+                switch (query) {
+                    case 1:
+                        runQuery1();
+                        break;
+                    case 2:
+                        runQuery2();
+                        break;
+                    case 3:
+                        runQuery3();
+                        break;
+                    case 4:
+                        runQuery4();
+                        break;
+                    case 5:
+                        runQuery5();
+                        break;
+                }
+
+                System.out.print("Run another query? (Y/N): ");
+                ans = s.next();
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage() + " Can't connect to database.");
@@ -204,7 +225,7 @@ public class HW4 {
                 + "HAVING count(rid) > " + num + ";";
         ResultSet result = stmt.executeQuery(query);
 
-        System.out.println("\nRealtors that are involved in more than " + num + " transcactions:\n");
+        System.out.println("\nRealtors that are involved in more than " + num + " transactions:\n");
         while (result.next()) {
             System.out.println("rid: " + result.getInt(1));
             System.out.println("first name: " + result.getString(2));

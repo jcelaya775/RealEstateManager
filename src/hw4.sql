@@ -312,26 +312,20 @@ SELECT pid, net_profit_loss as highest_profit
         (SELECT max(net_profit_loss)
             FROM before_after);
 
--- query 8
-CREATE VIEW land_compat AS
-    SELECT la.pid, la.acreage
-        FROM land la, land_buyer lb
-        WHERE la.acreage >= lb.min_acres
-            AND la.acreage <= lb.max_acres;
-
-SELECT pid, acreage
-    FROM land l
+-- query 8 (Show the pid and acreage for any land property listed for sale that matches the interest of all land buying clients)
+SELECT l.pid, acreage -- all land properties that are on sale
+    FROM land l JOIN land_listing ll
+        ON l.pid = ll.pid
     WHERE NOT EXISTS
-        (SELECT la.pid, la.acreage -- properites that satisfy client's needs 
-            FROM land la, land_buyer lb
-            WHERE la.acreage >= lb.min_acres
-                AND la.acreage <= lb.max_acres
-        EXCEPT
-        SELECT la.pid, la.acreage -- property that match the property that we're checking for
-           	FROM land la
-           	WHERE la.pid = l.pid);
+        (SELECT cid -- clients that are compatible with current property
+            FROM land_buyer c
+            WHERE l.acreage >= c.min_acres
+                and l.acreage <= c.max_acres
+        NOT IN
+        SELECT cid -- all clients
+            FROM land_buyer);
 
--- query 9
+-- query 9 (Show the realtor id, name, and dollar amount earned for the realtor that earned the most money as a buying realtor. Include all transactions where they were a buying realtor and assume realtors earn 3% of the selling price)
 SELECT r.rid, fname, lname, (sum(sellprice) * 0.03) as earnings
     FROM transactions t, realtor r
     WHERE t.sell_rid = r.rid
