@@ -33,8 +33,8 @@ INSERT INTO client VALUES
 
 CREATE TABLE land_buyer (
     cid INT, 
-    min_acres INT, 
-    max_acres INT,
+    min_acres FLOAT, 
+    max_acres FLOAT,
     PRIMARY KEY(cid),
     FOREIGN KEY(cid) REFERENCES client(cid)
 );
@@ -229,3 +229,105 @@ INSERT INTO land_trans VALUES
     (8, 3, 18, 3, 8, 400000),
     (9, 4, 19, 9, 9, 300000),
     (10, 5, 20, 10, 10, 380000);
+
+-- query 1
+CREATE OR REPLACE VIEW land_view AS
+    SELECT la.pid, listprice, street, city, state, zip, acreage
+        FROM land la join listing li
+        WHERE la.pid = li.pid;
+
+SELECT lb.cid, lv.pid, listprice, street, city, state, zip, acreage
+    FROM land_buyer lb, land_view lv
+    WHERE lv.acreage >= lb.min_acres
+        AND lv.acreage <= lb.max_acres;
+
+-- query 2
+CREATE OR REPLACE VIEW house_view AS 
+    SELECT h.pid, listprice, street, city, state, zip, bed, bath, style
+        FROM house h join listing l
+            ON h.pid = l.pid;
+
+SELECT cid, pid, listprice, street, city, state, zip, hb.bed, hb.bath, hb.style 
+    FROM house_buyer hb, house_view hv 
+    WHERE hb.style = hv.style 
+    AND hb.bed = hv.bed 
+    AND hb.bath = hv.bath;
+
+-- query 3
+CREATE OR REPLACE VIEW transactions AS
+    (SELECT * FROM house_trans)
+    UNION
+    (SELECT * FROM land_trans);
+
+CREATE OR REPLACE VIEW buying_client AS
+    (SELECT c.cid, fname, lname
+        FROM house_buyer h JOIN client c
+            ON h.cid = c.cid)
+    UNION
+    (SELECT c.cid, fname, lname
+        FROM land_buyer l JOIN client c
+            ON l.cid = c.cid);
+
+CREATE OR REPLACE VIEW selling_client AS
+    SELECT c.cid, fname, lname 
+        FROM seller s JOIN client c
+            ON s.cid = c.cid;
+
+SELECT DISTINCT pid, bc.cid as buy_cid, bc.fname, bc.lname, sc.cid as sell_cid, sc.fname, sc.lname, r1.rid as buy_rid, r1.fname, r1.lname, r2.rid as sell_rid, r2.fname, r2.lname 
+    FROM transactions t,  buying_client bc, selling_client sc, realtor r1, realtor r2
+    WHERE t.buy_cid = bc.cid 
+        AND t.sell_cid = sc.cid
+        AND (t.buy_rid = r1.rid OR t.buy_rid = r1.rid)
+        AND (t.sell_rid = r2.rid OR t.sell_cid = r2.rid);
+
+-- query 4
+SELECT DISTINCT t.pid, t.buy_rid, t.sell_rid, t.sellprice, l.listprice 
+    FROM transactions t, listing l
+    WHERE t.pid = l.pid 
+        AND sellprice > listprice;
+
+-- query 5
+SELECT DISTINCT rid, fname, lname
+    FROM transactions, realtor
+    WHERE buy_rid = rid
+    GROUP BY rid
+    HAVING count(rid) > 3;
+    
+-- query 6
+SELECT DISTINCT rid, fname, lname
+    FROM transactions JOIN realtor r
+        ON t.buy_rid = r.rid
+    WHERE r.rid NOT IN
+        (SELECT sell_rid FROM transactions); 
+
+-- query 7
+CREATE OR REPLACE VIEW before_after AS
+    SELECT t.pid, (t.sellprice - l.listprice) as net_profit_loss
+    FROM transactions t JOIN listing l
+        ON t.pid = l.pid;
+        
+SELECT pid, net_profit_loss as highest_profit
+    FROM before_after
+    WHERE net_profit_loss IN 
+        (SELECT max(net_profit_loss)
+            FROM before_after);
+
+-- query 8
+SELECT DISTINCT l.pid, l.acreage
+    FROM land l, land_listing ll, land_buyer c
+    WHERE l.pid = ll.pid
+    	AND l.acreage >= c.min_acres
+		AND l.acreage <= c.max_acres
+    GROUP BY l.pid, l.acreage
+    HAVING COUNT(*) =
+        (SELECT COUNT(*)
+         	FROM land_buyer c)
+
+-- query 9
+SELECT a.rid, fname, lname, max(earnings) as earnings
+    FROM realtor a JOIN
+        (SELECT rid, sum(sellprice) * 0.03 as earnings -- earnings of each selling realtor
+            FROM transactions t JOIN realtor r
+                ON t.sell_rid = r.rid
+            GROUP BY sell_rid) b
+        ON a.rid = b.rid;
