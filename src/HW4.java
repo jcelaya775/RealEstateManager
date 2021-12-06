@@ -26,7 +26,7 @@ public class HW4 {
             System.out.print("Would you ilke to run a query? (Y/N): ");
             String ans = s.next();
 
-            while (ans.equalsIgnoreCase("y") || ans.equalsIgnoreCase("yes")) {
+            while (ans.equalsIgnoreCase("y") || ans.equalsIgnoreCase("yes ofigesvvetgrauj hgvtT")) {
                 System.out.println();
                 System.out.println(
                         "Query 1) For a particular land buying client, show all properties that match the client's interests.");

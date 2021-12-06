@@ -312,26 +312,22 @@ SELECT pid, net_profit_loss as highest_profit
         (SELECT max(net_profit_loss)
             FROM before_after);
 
--- query 8 (Show the pid and acreage for any land property listed for sale that matches the interest of all land buying clients)
-SELECT l.pid, acreage -- all land properties that are on sale
-    FROM land l JOIN land_listing ll
-        ON l.pid = ll.pid
-    WHERE NOT EXISTS
-        (SELECT cid -- clients that are compatible with current property
-            FROM land_buyer c
-            WHERE l.acreage >= c.min_acres
-                and l.acreage <= c.max_acres
-        NOT IN
-        SELECT cid -- all clients
-            FROM land_buyer);
+-- query 8
+SELECT DISTINCT l.pid, l.acreage
+    FROM land l, land_listing ll, land_buyer c
+    WHERE l.pid = ll.pid
+    	AND l.acreage >= c.min_acres
+		AND l.acreage <= c.max_acres
+    GROUP BY l.pid, l.acreage
+    HAVING COUNT(*) =
+        (SELECT COUNT(*)
+         	FROM land_buyer c)
 
--- query 9 (Show the realtor id, name, and dollar amount earned for the realtor that earned the most money as a buying realtor. Include all transactions where they were a buying realtor and assume realtors earn 3% of the selling price)
-SELECT r.rid, fname, lname, (sum(sellprice) * 0.03) as earnings
-    FROM transactions t, realtor r
-    WHERE t.sell_rid = r.rid
-        AND sum(sellprice) >=
-        (SELECT sum(sellprice)
-            FROM transactions t2
-            WHERE t2.sell_rid = r.rid 
-            GROUP BY sell_rid
-        );
+-- query 9
+SELECT a.rid, fname, lname, max(earnings) as earnings
+    FROM realtor a JOIN
+        (SELECT rid, sum(sellprice) * 0.03 as earnings -- earnings of each selling realtor
+            FROM transactions t JOIN realtor r
+                ON t.sell_rid = r.rid
+            GROUP BY sell_rid) b
+        ON a.rid = b.rid;
