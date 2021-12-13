@@ -5,6 +5,7 @@ public class HW4 {
     static Scanner s;
     static Statement stmt;
 
+    
     public static void main(String[] args) {
         // Load mysql driver
         try {
