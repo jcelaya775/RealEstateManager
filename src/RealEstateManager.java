@@ -1,7 +1,7 @@
 import java.sql.*;
 import java.util.Scanner;
 
-public class HW4 {
+public class RealEstateManager {
     static Scanner s;
     static Statement stmt;
 
